@@ -50,7 +50,7 @@ st.markdown("<h1 style='text-align: center; color: #1E88E5;'>📚 NHSO Dynamic F
 st.sidebar.markdown("<h3 style='text-align: center; color: #1E88E5;'>เมนู</h3>", unsafe_allow_html=True)
 
 file_name = 'merged_data.xlsx'
-
+synonyms_file = 'synonymsfile_NHSO.xlsx'
 en_stop = set(stopwords.words('english'))
 th_stop = set(thai_stopwords())
 
@@ -68,57 +68,19 @@ def clean_q(text):
     text = text.replace('\r', '')
     return text
 
-def load_synonyms(synonyms_file):
-    df = pd.read_excel(synonyms_file)
-    synonyms = {}
-    for index, row in df.iterrows():
-        main_term = row['คำหลัก']
-        synonym = row['synonyms']
-        if main_term not in synonyms:
-            synonyms[main_term] = set()
-        synonyms[main_term].add(synonym)
-        synonyms[main_term].add(main_term)
-    return synonyms
-
-def search(patterns, data, synonyms):
-    expanded_patterns = set()
-    for pattern in patterns:
-        if pattern in synonyms:
-            expanded_patterns.update(synonyms[pattern])
-        expanded_patterns.add(pattern)
-    
+def search(patterns, data):
     series = pd.Series(data)
     counts_df = pd.DataFrame(index=series.index)
-    nvocab = len(expanded_patterns)
-    
-    for pattern in expanded_patterns:
+    nvocab = len(patterns)
+    for pattern in patterns:
         counts_df[pattern] = series.str.count(pattern)
-    
     logit = counts_df > 0
     counts_df = counts_df / logit.sum(axis=0)
     counts_df['tier'] = logit.sum(axis=1)
     counts_df['total_words'] = counts_df.iloc[:, :-1].sum(axis=1)
     counts_df['logit'] = counts_df['tier'] == nvocab
-    
     return counts_df.sort_values(by=['tier', 'total_words'], ascending=[False, False])
-
-
-data = df['Text'].tolist()
-
-# Load synonyms from Excel file
-synonyms_file = 'synonyms.xlsx'
-synonyms = load_synonyms(synonyms_file)
-
-# Define patterns (primary keywords)
-patterns = ["สิทธิบัตรทอง", "สิทธิหลักประกันสุขภาพแห่งชาติ"]
-
-# Perform the search
-result = search(patterns, data, synonyms)
-
-# Print the result
-print(result)
-
-
+    
 def upload_and_merge_excel(file_name):
     if os.path.exists(file_name):
         existing_data = pd.read_excel(file_name)
@@ -140,13 +102,27 @@ def view_excel(file_name):
         st.warning(f"ไม่พบไฟล์ {file_name}")
 
 def edit_excel(file_name):
-    df_combined = upload_and_merge_excel(file_name)
-    edited_data = st.data_editor(df_combined)
+    if file_name not in st.session_state:
+        st.session_state[file_name] = upload_and_merge_excel(file_name)
+
+    edited_data = st.data_editor(st.session_state[file_name])
+
+    if st.button(f"Add Row to {file_name}"):
+        new_row = pd.DataFrame([[''] * st.session_state[file_name].shape[1]], columns=st.session_state[file_name].columns)
+        st.session_state[file_name] = pd.concat([st.session_state[file_name], new_row], ignore_index=True)
+        edited_data = st.session_state[file_name]
+
+    if not edited_data.empty:
+        row_to_delete = st.selectbox(f"Select Row to Delete from {file_name}", edited_data.index)
+        if st.button(f"Delete Row from {file_name}"):
+            st.session_state[file_name] = edited_data.drop(row_to_delete).reset_index(drop=True)
+            edited_data = st.session_state[file_name]
+
     return edited_data
 
 option = st.sidebar.selectbox(
     'MODE',
-    ['🔍 ถามคำถาม', '📊 ดูข้อมูล Excel', '✏️ แก้ไขข้อมูล Excel']
+    ['🔍 ถามคำถาม', '📊 ดูข้อมูล Excel', '✏️ แก้ไขข้อมูล Excel','📊 ดูข้อมูล synonyms_file','✏️ แก้ไขข้อมูล synonyms_file']
 )
 
 if '🔍 ถามคำถาม' in option:
@@ -180,11 +156,20 @@ elif option == '📊 ดูข้อมูล Excel':
     view_excel(file_name)
 elif option == '✏️ แก้ไขข้อมูล Excel':
     st.markdown("### ✏️ แก้ไขข้อมูล Excel")
-    edited_data = edit_excel(file_name)
-    
+    edited_data = edit_excel(file_name)    
     if st.button('💾 บันทึกข้อมูล'):
         with st.spinner('กำลังบันทึกข้อมูล...'):
             edited_data.to_excel(file_name, index=False)
         st.success(f'บันทึกข้อมูลสำเร็จ: {file_name}')
+elif option == '📊 ดูข้อมูล synonyms_file':
+    st.markdown("### 📊 ดูข้อมูล synonyms_file")
+    view_excel(synonyms_file)
+elif option == '✏️ แก้ไขข้อมูล synonyms_file':
+    st.markdown("### ✏️ แก้ไขข้อมูล synonyms_file")
+    edited_data = edit_excel(synonyms_file)
+    if st.button('💾 บันทึกข้อมูล'):
+        with st.spinner('กำลังบันทึกข้อมูล...'):
+            edited_data.to_excel(synonyms_file, index=False)
+        st.success(f'บันทึกข้อมูลสำเร็จ: {synonyms_file}')
 st.markdown("---")
 st.markdown("<p style='text-align: center;'>© 2024 NHSO Dynamic FAQ. All rights reserved.</p>", unsafe_allow_html=True)

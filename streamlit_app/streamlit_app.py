@@ -4,18 +4,16 @@ import os
 import pandas as pd
 
 st.title('NHSO Dynamic FAQ')
-#openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')
-# Set your OpenAI API key
+#openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password'
 #os.environ["OPENTYPHOON_API_KEY"] = openai_api_key
 os.environ["OPENTYPHOON_API_KEY"] = 'sk-RBNtvMyKIyTk9G5J1J3OegmdfD03y6v3Pp9sPvcdPuCEOsr8'
-# Function to generate OpenAI response
 def generate_response(input_text):
     if os.environ["OPENTYPHOON_API_KEY"].startswith('sk-'):
         client = OpenAI(api_key=os.environ["OPENTYPHOON_API_KEY"], base_url="https://api.opentyphoon.ai/v1")
         response = client.chat.completions.create(
             model="typhoon-instruct",
             messages=[{"role": "user", "content": input_text}],  # User input question
-            max_tokens=500,
+            max_tokens=1500,
             temperature=0.7,
             top_p=1,
         )
@@ -37,7 +35,6 @@ def upload_and_merge_excel(file_name):
         return df_combined
     return existing_data
 
-# Function to display Excel data
 def view_excel(file_name):
     if os.path.exists(file_name):
         df = pd.read_excel(file_name)
@@ -76,7 +73,6 @@ option = st.sidebar.selectbox(
 # st.write('โหมดที่เลือกจาก navigation bar ที่ 2:', option2)
 
 
-# Display content based on the selected option
 if option == 'ถามคำถาม':
     with st.form('my_form'):
         text = st.text_area('ป้อนคำถาม:', '3 เคล็ดลับสำคัญในการเรียนรู้การเขียนโปรแกรมคืออะไร?')
