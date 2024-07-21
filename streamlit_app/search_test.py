@@ -7,36 +7,35 @@ from pythainlp.corpus import thai_stopwords
 import thaispellcheck
 import re
 
-def download_nltk_data():
-    try:
-        nltk.download('omw-1.4')
-        nltk.download('stopwords')
-        nltk.download('wordnet')
-        nltk.download('punkt')
-        st.write("ดาวน์โหลดข้อมูล NLTK ที่ต้องการเรียบร้อยแล้ว")
-    except Exception as e:
-        st.error(f"เกิดข้อผิดพลาดขณะดาวน์โหลดข้อมูล NLTK: {e}")
-        st.stop()
+import streamlit as st
+import nltk
 
-# ตรวจสอบการมีอยู่ของข้อมูล NLTK
-required_data = ['corpora/omw-1.4', 'corpora/stopwords', 'corpora/wordnet', 'tokenizers/punkt']
-data_missing = False
+def ensure_nltk_data():
+    required_data = [
+        ('corpora/omw-1.4', 'omw-1.4'),
+        ('corpora/stopwords', 'stopwords'),
+        ('corpora/wordnet', 'wordnet'),
+        ('tokenizers/punkt', 'punkt')
+    ]
 
-for data in required_data:
-    try:
-        nltk.data.find(data)
-    except LookupError:
-        data_missing = True
-        break
+    for data_path, data_name in required_data:
+        try:
+            nltk.data.find(data_path)
+        except LookupError:
+            try:
+                st.write(f"กำลังดาวน์โหลดข้อมูล NLTK: {data_name}")
+                nltk.download(data_name)
+                st.write(f"ดาวน์โหลดข้อมูล {data_name} สำเร็จ")
+            except Exception as e:
+                st.error(f"เกิดข้อผิดพลาดขณะดาวน์โหลดข้อมูล {data_name}: {e}")
+                st.stop()
 
-# ดาวน์โหลดข้อมูล NLTK หากยังไม่มีข้อมูล
-if data_missing:
-    download_nltk_data()
-else:
-    st.write("ข้อมูล NLTK ที่ต้องการมีครบถ้วนแล้ว")
+# เรียกใช้ฟังก์ชันเพื่อให้แน่ใจว่าข้อมูล NLTK มีครบถ้วน
+ensure_nltk_data()
 
 # โค้ดส่วนอื่นของแอป Streamlit ของคุณ
 st.write("แอปทำงานตามปกติ")
+
 st.set_page_config(page_title="NHSO Dynamic FAQ", page_icon="📚", layout="wide")
 
 st.markdown("""
