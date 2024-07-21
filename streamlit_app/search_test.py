@@ -7,21 +7,15 @@ from pythainlp.corpus import thai_stopwords
 import thaispellcheck
 import re
 
-
-
-# ตรวจสอบการมีอยู่ของข้อมูล NLTK
-required_data = ['corpora/omw-1.4', 'corpora/stopwords', 'corpora/wordnet', 'tokenizers/punkt']
-
-for data in required_data:
-    try:
-        nltk.data.find(data)
-    except LookupError:
-        st.error(f"ไม่พบข้อมูล NLTK ที่ต้องการ: {data}. กรุณารันสคริปต์ 'download_nltk_data.py' เพื่อดาวน์โหลดข้อมูล")
-        st.stop()
-
-# โค้ดส่วนอื่นของแอป Streamlit ของคุณ
-st.write("ข้อมูล NLTK ที่ต้องการมีครบถ้วนแล้ว")
-
+try:
+    nltk.download('omw-1.4')
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+    nltk.download('punkt')
+    st.write("ดาวน์โหลดข้อมูล NLTK ที่ต้องการเรียบร้อยแล้ว")
+except Exception as e:
+    st.error(f"เกิดข้อผิดพลาดขณะดาวน์โหลดข้อมูล NLTK: {e}")
+    st.stop()
 st.set_page_config(page_title="NHSO Dynamic FAQ", page_icon="📚", layout="wide")
 
 st.markdown("""
