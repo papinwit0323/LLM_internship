@@ -3,3 +3,4 @@ openai
 langchain
 nltk
 pythainlp
+scikit-learn
