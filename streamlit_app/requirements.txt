@@ -6,3 +6,4 @@ pythainlp
 scikit-learn
 python-docx
 openpyxl
+thaispellcheck
