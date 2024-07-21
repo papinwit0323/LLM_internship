@@ -4,3 +4,4 @@ langchain
 nltk
 pythainlp
 scikit-learn
+python-docx
