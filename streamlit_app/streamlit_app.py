@@ -55,22 +55,6 @@ option = st.sidebar.selectbox(
 )
 
 
-# First navigation bar
-# option1 = st.sidebar.selectbox(
-#     'เลือกโหมดที่ 1',
-#     ['ถามคำถาม', 'ดูข้อมูล Excel', 'แก้ไขข้อมูล Excel'],
-#     key='nav1'
-# )
-
-# Second navigation bar
-# option2 = st.sidebar.selectbox(
-#     'เลือกโหมดที่ 2',
-#     ['โหมด A', 'โหมด B', 'โหมด C'],
-#     key='nav2'
-# )
-
-# st.write('โหมดที่เลือกจาก navigation bar ที่ 1:', option1)
-# st.write('โหมดที่เลือกจาก navigation bar ที่ 2:', option2)
 
 
 if option == 'ถามคำถาม':

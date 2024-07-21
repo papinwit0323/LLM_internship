@@ -177,41 +177,7 @@ def update_synonyms(df):
 
     return df
 
-def process_input(text, file_name, delimiter=','):
-    if file_name not in st.session_state:
-        st.error(f"File {file_name} not found in session state.")
-        return
-
-    df = st.session_state[file_name]
-    words = text.split(delimiter)
-    words = [word.strip() for word in words]  # Strip whitespace
-    words = list(set(words))  # Remove duplicates
-
-    new_rows = []
-
-    for i, word in enumerate(words):
-        main_word = word
-        synonyms = [w for j, w in enumerate(words) if i != j]
-        synonyms_str = ','.join(synonyms)
-
-        # Check if main_word already exists in the DataFrame
-        if main_word in df['main_word'].values:
-            idx = df[df['main_word'] == main_word].index[0]
-            existing_synonyms = set(df.at[idx, 'synonyms'].split('|'))
-            new_synonyms = existing_synonyms.union(set(synonyms))
-            df.at[idx, 'synonyms'] = ','.join(sorted(new_synonyms))
-        else:
-            new_rows.append({'main_word': main_word, 'synonyms': synonyms_str})
-
-    # Append new rows to the DataFrame
-    if new_rows:
-        df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
-
-    st.session_state[file_name] = df
-    st.experimental_rerun()
-
-
-def edit_excel1(file_name):
+def edit_excel(file_name):
     if file_name not in st.session_state:
         st.session_state[file_name] = pd.read_excel(file_name) if os.path.exists(file_name) else pd.DataFrame(columns=['main_word', 'synonyms'])
 
@@ -238,6 +204,7 @@ def edit_excel1(file_name):
                     'synonyms': lambda x: ', '.join(set(', '.join(x).split(', ')))
                 }).reset_index()
                 
+                # อัปเดต synonyms
                 grouped = update_synonyms(grouped)
 
                 st.dataframe(grouped)
@@ -245,45 +212,7 @@ def edit_excel1(file_name):
                     st.session_state[file_name] = grouped
                     st.experimental_rerun()
 
-    st.subheader("เพิ่มแถวใหม่")
-    new_text = st.text_input("ป้อนข้อความใหม่ (คั่นด้วยเครื่องหมาย ','):")
-    if st.button(f"Add New Row to {file_name}"):
-        process_input(new_text, file_name)
-
-    if st.button(f"Add Empty Row to {file_name}"):
-        new_row = pd.DataFrame([[''] * st.session_state[file_name].shape[1]], columns=st.session_state[file_name].columns)
-        st.session_state[file_name] = pd.concat([st.session_state[file_name], new_row], ignore_index=True)
-        st.experimental_rerun()
-
-    if not edited_data.empty:
-        row_to_delete = st.selectbox(f"Select Row to Delete from {file_name}", edited_data.index)
-        if st.button(f"Delete Row from {file_name}"):
-            st.session_state[file_name] = edited_data.drop(row_to_delete).reset_index(drop=True)
-            st.experimental_rerun()
-
-    return edited_data
-
-def edit_excel(file_name):
-    if file_name not in st.session_state:
-        st.session_state[file_name] = pd.read_excel(file_name) if os.path.exists(file_name) else pd.DataFrame(columns=['main_word', 'synonyms'])
-
-    st.subheader("อัปโหลดไฟล์ Excel ใหม่")
-    uploaded_file = st.file_uploader("อัปโหลดไฟล์ Excel", type=["xlsx", "xls"], key=f"uploader_{file_name}")
-    if uploaded_file is not None:
-        df_new = pd.read_excel(uploaded_file)
-
-        required_columns = ['ประเด็น','คำถาม', 'คำตอบ']
-        if not all(col in df_new.columns for col in required_columns):
-            st.error("ไฟล์ที่อัปโหลดต้องมีคอลัมน์ 'ประเด็น','คำถาม', 'คำตอบ'")
-        else:
-            st.session_state[file_name] = df_new
-            
-
-    st.subheader("ตารางปัจจุบัน")
-    edited_data = st.data_editor(st.session_state[file_name], width=800)
-
     # ส่วนการเพิ่มและลบแถว
-    st.subheader("ตัวเลือกเพิ่มเติม")
     if st.button(f"Add Row to {file_name}"):
         new_row = pd.DataFrame([[''] * st.session_state[file_name].shape[1]], columns=st.session_state[file_name].columns)
         st.session_state[file_name] = pd.concat([st.session_state[file_name], new_row], ignore_index=True)
@@ -401,7 +330,7 @@ elif option == '📊 ดูข้อมูล synonyms_file':
     view_excel(synonyms_file)
 elif option == '✏️ แก้ไขข้อมูล synonyms_file':
     st.markdown("### ✏️ แก้ไขข้อมูล synonyms_file")
-    edited_data = edit_excel1(synonyms_file)
+    edited_data = edit_excel(synonyms_file)
     if st.button('💾 บันทึกข้อมูล'):
         with st.spinner('กำลังบันทึกข้อมูล...'):
             edited_data.to_excel(synonyms_file, index=False)
