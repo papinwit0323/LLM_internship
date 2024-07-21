@@ -118,7 +118,7 @@ synonyms_file = 'synonymsfile_NHSO.xlsx'
 os.environ["OPENTYPHOON_API_KEY"] = 'sk-RBNtvMyKIyTk9G5J1J3OegmdfD03y6v3Pp9sPvcdPuCEOsr8'
 @st.cache_data
 def load_data():
-    df = pd.read_excel('merged_data.xlsx')
+    df = pd.read_excel('streamlit_app\merged_data.xlsx')
     return df
 
 df = load_data()
