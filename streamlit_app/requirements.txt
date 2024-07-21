@@ -5,3 +5,4 @@ nltk
 pythainlp
 scikit-learn
 python-docx
+openpyxl
