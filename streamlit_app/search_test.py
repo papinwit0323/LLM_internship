@@ -6,10 +6,11 @@ from nltk.corpus import stopwords
 from pythainlp.corpus import thai_stopwords
 import thaispellcheck
 import re
-nltk.download('omw-1.4')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('punkt')
+
+# nltk.download('omw-1.4')
+# nltk.download('stopwords')
+# nltk.download('wordnet')
+# nltk.download('punkt')
 st.set_page_config(page_title="NHSO Dynamic FAQ", page_icon="📚", layout="wide")
 
 st.markdown("""
