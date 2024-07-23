@@ -90,41 +90,12 @@ def load_synonyms(synonyms_file):
     return {}
 
 def expand_pattern_with_synonyms(pattern, synonym_dict):
-    # expanded_patterns = set()
-    # if pattern in synonym_dict:
-    #     expanded_patterns.update(synonym_dict[pattern])
-    # expanded_patterns.add(pattern)
-    # return expanded_patterns
     expanded_patterns = set()
     if pattern in synonym_dict:
         expanded_patterns.update(synonym_dict[pattern])
     expanded_patterns.add(pattern)
     return expanded_patterns
-# Function to search for patterns in data
-# def search(patterns, data, synonym_dict, logic='AND'):
-#     series = pd.Series(data)
-#     boolean_df = pd.DataFrame(index=series.index)
-    
-#     for pattern in patterns:
-#         expanded_patterns = expand_pattern_with_synonyms(pattern, synonym_dict)
-#         pattern_boolean = series.str.contains(pattern, regex=False)
-#         if len(expanded_patterns) > 1:
-#             expanded_boolean = pd.Series([False] * len(series))
-#             for expanded_pattern in expanded_patterns:
-#                 expanded_boolean = expanded_boolean | series.str.contains(expanded_pattern, regex=False)
-#         else:
-#             expanded_boolean = pattern_boolean
-        
-#         boolean_df[pattern] = pattern_boolean if logic == 'AND' else expanded_boolean
 
-#     if logic == 'AND':
-#         result_mask = boolean_df.all(axis=1)
-#     elif logic == 'OR':
-#         result_mask = boolean_df.any(axis=1)
-#     else:
-#         raise ValueError("Invalid logic: choose 'AND' or 'OR'")
-    
-#     return boolean_df[result_mask]
 def search(patterns, data, synonym_dict, logic='AND'):
     series = pd.Series(data)
     boolean_df = pd.DataFrame(index=series.index)
@@ -132,7 +103,7 @@ def search(patterns, data, synonym_dict, logic='AND'):
     for pattern in patterns:
         expanded_patterns = expand_pattern_with_synonyms(pattern, synonym_dict)
         pattern_boolean = series.str.contains(pattern, regex=False)
-        
+        print(expanded_patterns)
         expanded_boolean = pd.Series([False] * len(series))
         for expanded_pattern in expanded_patterns:
             expanded_boolean |= series.str.contains(expanded_pattern, regex=False)
@@ -146,7 +117,6 @@ def search(patterns, data, synonym_dict, logic='AND'):
         result_mask = boolean_df.any(axis=1)
     else:
         raise ValueError("Invalid logic: choose 'AND' or 'OR'")
-    
     return boolean_df[result_mask]
 
 
@@ -249,7 +219,7 @@ def edit_excel1(file_name):
                     st.experimental_rerun()
 
     st.subheader("เพิ่มแถวใหม่")
-    new_text = st.text_input("ป้อนข้อความใหม่ (คั่นด้วยเครื่องหมาย ','):")
+    new_text = st.text_input("ป้อนข้อความใหม่ (คั่นด้วยเครื่องหมาย ','):ตัวอย่างคำค้นหา        >       คำหลัก, synonyms,synonyms เช่น สิทธิบัตรทอง,สิทธิ30บาท,สิทธิหลักประกันสุขภาพถ้วนหน้า")
     if st.button(f"Add New Row to {file_name}"):
         process_input(new_text, file_name)
 
