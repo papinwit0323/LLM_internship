@@ -11,7 +11,7 @@ from pythainlp.util import normalize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
-from docx import Document
+
 
 st.set_page_config(page_title="NHSO Dynamic FAQ", page_icon="🌟", layout="wide")
 
